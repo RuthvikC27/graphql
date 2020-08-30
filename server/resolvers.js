@@ -6,6 +6,10 @@ const Query = {
   jobs: () => db.jobs.list(),
 }
 
+const Company = {
+  jobs: (company) => db.jobs.list().filter(job => company.id == job.companyId)
+}
+
 const Job = {
   companies: (job) => db.companies.get(job.companyId),
 }
@@ -13,4 +17,5 @@ const Job = {
 module.exports = {
   Query,
   Job,
+  Company
 }
