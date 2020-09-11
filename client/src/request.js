@@ -1,4 +1,5 @@
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
+import { getAccessToken, isLoggedIn } from './auth'
 
 const endpoint_url = 'http://localhost:9000/graphql';
 
@@ -9,17 +10,18 @@ const client = new ApolloClient({
 
 // console.log(client)
 
-async function graphqlRequest(query, variables) {
-  const response = await fetch(endpoint_url, {
+async function graphqlRequest(query, variables={}) {
+  const request = {
     method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-  })
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ query, variables, }),
+  }
+  if (isLoggedIn()) {
+    request.headers['authorization'] = 'Bearer ' + getAccessToken();
+  }
+
+  const response = await fetch(endpoint_url, request)
+
   const responseBody = await response.json()
   if (responseBody.errors) {
     const message = responseBody.errors.map((error) => error.message).join('\n')
