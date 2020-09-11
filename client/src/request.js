@@ -1,4 +1,13 @@
-const endpoint_url = 'http://localhost:9000/graphql'
+import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
+
+const endpoint_url = 'http://localhost:9000/graphql';
+
+const client = new ApolloClient({
+  uri: endpoint_url,
+  cache: new InMemoryCache()
+})
+
+// console.log(client)
 
 async function graphqlRequest(query, variables) {
   const response = await fetch(endpoint_url, {
@@ -36,7 +45,7 @@ export async function loadCompany(id) {
 }
 
 export async function loadJob(id) {
-  const query = `
+  const query = gql`
     query jobQuery($id: ID!){
         job(id: $id){
           id
@@ -48,15 +57,16 @@ export async function loadJob(id) {
           description
         }
       }`
+
   const variables = {
-    id,
+    id
   }
-  const response = await graphqlRequest(query, variables)
-  return response.job
+  const { data } = await client.query({ query, variables });
+  return data.job
 }
 
 export async function loadJobs() {
-  const query = `{
+  const query = gql`{
         jobs{
             id,
             title,
@@ -65,8 +75,22 @@ export async function loadJobs() {
                 name
             },
         },
-    }`
-  const variables = {}
-  const response = await graphqlRequest(query, variables)
-  return response.jobs
+    }`;
+
+
+  const { data: { jobs } } = await client.query({ query });
+  return jobs
+}
+
+
+export async function createJob(input) {
+  const mutation = `mutation CreateJob($input: CreateJobInput){
+  Job: createJob(input: $input){
+    id
+    title
+    description
+  }
+}`
+  const response = await graphqlRequest(mutation, { input })
+  return response.Job
 }
