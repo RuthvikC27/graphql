@@ -16,6 +16,7 @@ const Job = {
 
 const Mutation = {
   createJob: (root, {input}, context) => {
+    // console.log(input)
     if(!context.user){
       throw new Error("Access Denied!")
     }
